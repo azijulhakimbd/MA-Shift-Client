@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 Auth
 CustomerReviews
-HowitsWorks
 InfoCard
 Merchant
 OurClient
