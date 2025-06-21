@@ -8,7 +8,7 @@
   default: true;
   --color-primary: blue;
   --color-secondary: teal;
-  --color-base-100: #caeb66;
+  --color-custom: #caeb66;
 }
 .urbanist {
   font-family: "Urbanist", sans-serif;

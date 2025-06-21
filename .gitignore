@@ -24,6 +24,5 @@ dist-ssr
 *.sw?
 Pages
 Layout
-Routes
-main.jsx
+
 
