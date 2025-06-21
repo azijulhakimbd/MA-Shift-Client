@@ -23,7 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 Auth
-Home
+CustomerReviews
+HowitsWorks
+InfoCard
+Merchant
+OurClient
+OurServices
+FAQ
+
 
 
 
