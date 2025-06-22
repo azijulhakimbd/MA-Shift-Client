@@ -3,7 +3,7 @@ import MAShiftLogo from "../MaShiftLogo/MAShiftLogo";
 
 const Footer = () => {
   return (
-    <footer className="footer footer-horizontal footer-center bg-black text-primary-content p-10">
+    <footer className="footer rounded-2xl footer-horizontal footer-center bg-black text-primary-content p-10">
       <aside>
         <MAShiftLogo></MAShiftLogo>
         <p className="font-bold">

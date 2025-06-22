@@ -9,7 +9,7 @@ import AuthProvider from "./Context/AuthContext/AuthProvider.jsx";
 Aos.init()
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <div className="urbanist bg-[#EAECED] max-w-7xl mx-auto">
+    <div className="urbanist bg-[#EAECED] lg:mx-24">
       <AuthProvider>
         <RouterProvider router={router} />
       </AuthProvider>

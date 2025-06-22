@@ -1,8 +1,13 @@
 import React from "react";
 import { NavLink } from "react-router";
 import MAShiftLogo from "../MaShiftLogo/MAShiftLogo";
+import useAuth from "../../../Hooks/useAuth";
 
 const Navbar = () => {
+  const {user, userSignOut}= useAuth();
+  const handleLogout=()=>{
+    userSignOut()
+  }
   const navItems = (
     <>
       <li>
@@ -23,7 +28,7 @@ const Navbar = () => {
     </>
   );
   return (
-    <div className="navbar bg-white shadow-sm">
+    <div className="navbar p-5 bg-white mx-auto rounded-2xl shadow-sm">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -50,14 +55,17 @@ const Navbar = () => {
             {navItems}
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl"><MAShiftLogo></MAShiftLogo></a>
+        <MAShiftLogo></MAShiftLogo>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">{navItems}</ul>
       </div>
       <div className="navbar-end">
-        <NavLink className="btn btn-outline rounded-4xl text-custom" to={'/login'}>Sign In</NavLink>
-        <NavLink className="btn rounded-3xl bg-custom" to={'/'}>Be a rider</NavLink>
+        {
+          user?  <><NavLink className="btn rounded-3xl mr-1 bg-custom" to={'/'}>Be a rider</NavLink> <button className="text-red-500 btn btn-outline rounded-4xl" onClick={handleLogout}>Log out</button>  </>: <NavLink className="btn btn-outline mr-1 rounded-4xl text-custom" to={'/login'}>Sign In</NavLink>
+        }
+        
+       
       </div>
     
     </div>

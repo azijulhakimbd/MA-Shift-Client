@@ -6,9 +6,9 @@ import Footer from '../Pages/Shared/Footer/Footer';
 const Root = () => {
     return (
         <div>
-            <Navbar></Navbar>
+            <div className='p-8'><Navbar></Navbar></div>
             <Outlet></Outlet>
-            <Footer></Footer>
+            <div className='p-8'><Footer></Footer></div>
         </div>
     );
 };
