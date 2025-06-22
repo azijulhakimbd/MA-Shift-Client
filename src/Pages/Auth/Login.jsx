@@ -1,19 +1,29 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router";
 
 const Login = () => {
-  const { register, handleSubmit } = useForm();
-  const onSubmit = data => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
     console.log(data);
-    
   };
+
   return (
     <div className="flex items-center justify-center px-4">
       <div className="w-full max-w-sm shadow-md p-8 rounded-lg bg-white">
         <h1 className="text-3xl font-bold text-gray-900 mb-1">Welcome Back</h1>
-        <p className="mb-6 text-sm text-gray-500">Login with MA SHIFT</p>
+        <p className="mb-6 text-sm text-gray-500">
+          Login with MA SHIFT
+        </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          
+
           {/* email */}
           <div>
             <label className="label">
@@ -22,9 +32,12 @@ const Login = () => {
             <input
               type="email"
               placeholder="Email"
-              {...register("email")}
+              {...register("email", { required: true })}
               className="input input-bordered w-full"
             />
+            {errors.email?.type === "required" && (
+              <p className="text-red-500 text-sm mt-1">Email is required</p>
+            )}
           </div>
 
           {/* password */}
@@ -34,11 +47,18 @@ const Login = () => {
             </label>
             <input
               type="password"
-              {...register("password")}
               placeholder="Password"
+              {...register("password", { required: true, minLength: 6 })}
               className="input input-bordered w-full"
             />
-            {/* forget password */}
+            {errors.password?.type === "required" && (
+              <p className="text-red-500 text-sm mt-1">Password is required</p>
+            )}
+            {errors.password?.type === "minLength" && (
+              <p className="text-red-500 text-sm mt-1">
+                Password must be 6 character or more.
+              </p>
+            )}
             <div className="text-right mt-1">
               <a href="#" className="text-sm text-blue-600 hover:underline">
                 Forget Password?
@@ -56,14 +76,16 @@ const Login = () => {
 
         <div className="mt-4 text-sm text-center">
           Don’t have any account?{" "}
-          <a href="#" className="text-green-600 hover:underline font-medium">
+          <Link
+            className="text-green-600 hover:underline font-medium"
+            to={"/register"}
+          >
             Register
-          </a>
+          </Link>
         </div>
 
         <div className="divider text-sm">Or</div>
 
-        {/* Google login */}
         <button className="btn w-full bg-white text-black border border-[#e5e5e5] hover:bg-gray-100">
           <svg
             aria-label="Google logo"

@@ -26,7 +26,7 @@ const cards = [
 
 const InfoCard = () => {
   return (
-    <section className="py-10 px-4 max-w-6xl mx-auto">
+    <section className="my-20 py-20 border-[#03373D] border-t-2 border-b-2 border-dashed px-4 max-w-6xl mx-auto">
       <div data-aos="flip-down" className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         {cards.map((card, index) => (
           <div
