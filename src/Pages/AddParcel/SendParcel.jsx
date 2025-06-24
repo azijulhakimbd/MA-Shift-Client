@@ -18,12 +18,20 @@ const SendParcel = () => {
     watch,
     formState: { errors },
     reset,
+    setValue,
   } = useForm({
     defaultValues: {
       type: "document",
-      senderName: user?.displayName || "",
+      senderName: "",
     },
   });
+
+  // Update sender name when user is available
+  useEffect(() => {
+    if (user?.displayName) {
+      setValue("senderName", user.displayName);
+    }
+  }, [user, setValue]);
 
   const watchType = watch("type");
   const watchSenderRegion = watch("senderRegion");
@@ -45,11 +53,22 @@ const SendParcel = () => {
   }, [watchReceiverRegion]);
 
   const calculateCost = (data) => {
-    let base = data.type === "document" ? 50 : 100;
-    if (data.type === "non-document" && data.weight) {
-      base += parseFloat(data.weight) * 10;
+    const isDocument = data.type === "document";
+    const weight = parseFloat(data.weight) || 0;
+    const sameRegion = data.senderRegion === data.receiverRegion;
+
+    if (isDocument) {
+      return sameRegion ? 60 : 80;
     }
-    return base;
+
+    if (weight <= 3) {
+      return sameRegion ? 110 : 150;
+    } else {
+      const extraWeightCost = (weight - 3) * 40;
+      const base = sameRegion ? 110 : 150;
+      const outsideExtra = sameRegion ? 0 : 40;
+      return base + extraWeightCost + outsideExtra;
+    }
   };
 
   const onSubmit = (data) => {
@@ -73,7 +92,7 @@ const SendParcel = () => {
   };
 
   return (
-    <div className="min-h-screen max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen container mx-auto px-4 py-8">
       <Toaster position="top-right" />
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold">Add Parcel</h2>
@@ -86,10 +105,7 @@ const SendParcel = () => {
           <h3 className="text-xl font-semibold mb-4">Parcel Info</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="form-control">
-              <label className="label mr-2">
-                <span className="label-text">Type</span>
-              </label>
-              <div className="flex gap-6">
+              <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     {...register("type")}
@@ -98,7 +114,7 @@ const SendParcel = () => {
                     className="radio"
                     defaultChecked
                   />
-                  <span className="label-text">Document</span>
+                  <span>Document</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -107,36 +123,32 @@ const SendParcel = () => {
                     value="non-document"
                     className="radio"
                   />
-                  <span className="label-text">Non-Document</span>
+                  <span>Non-Document</span>
                 </label>
               </div>
             </div>
 
             <div className="form-control">
-              <label className="label mr-2">
-                <span className="label-text">Title</span>
-              </label>
               <input
                 {...register("title", { required: "Title is required" })}
-                className="input input-bordered"
+                className="input input-bordered w-full"
                 placeholder="Parcel Title"
               />
               {errors.title && (
-                <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.title.message}
+                </p>
               )}
             </div>
 
             {watchType === "non-document" && (
               <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Weight (kg)</span>
-                </label>
                 <input
                   type="number"
                   step="0.1"
                   {...register("weight")}
-                  className="input input-bordered"
-                  placeholder="e.g. 1.5"
+                  className="input input-bordered w-full"
+                  placeholder="Weight (kg)"
                 />
               </div>
             )}
@@ -149,83 +161,54 @@ const SendParcel = () => {
           <div className="card bg-base-100 shadow-md p-6">
             <h3 className="text-xl font-semibold mb-4">Sender Info</h3>
             <div className="grid grid-cols-1 gap-4">
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Name</span>
-                </label>
-                <input
-                  {...register("senderName")}
-                  className="input input-bordered"
-                  readOnly
-                />
-              </div>
+              <input
+                {...register("senderName")}
+                className="input input-bordered w-full"
+                readOnly
+                placeholder="Sender Name"
+              />
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Contact</span>
-                </label>
-                <input
-                  {...register("senderContact", { required: true })}
-                  className="input input-bordered"
-                  placeholder="Contact"
-                />
-              </div>
+              <input
+                {...register("senderContact", { required: true })}
+                className="input input-bordered w-full"
+                placeholder="Contact"
+              />
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Region</span>
-                </label>
-                <select
-                  {...register("senderRegion", { required: true })}
-                  className="select select-bordered"
-                >
-                  <option value="">Select Region</option>
-                  {regionList.map((region, idx) => (
-                    <option key={idx} value={region}>
-                      {region}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                {...register("senderRegion", { required: true })}
+                className="select select-bordered w-full"
+              >
+                <option value="">Select Region</option>
+                {regionList.map((region, idx) => (
+                  <option key={idx} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </select>
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Service Center</span>
-                </label>
-                <select
-                  {...register("senderCenter", { required: true })}
-                  className="select select-bordered"
-                >
-                  <option value="">Select Service Center</option>
-                  {senderCenters.map((center, idx) => (
-                    <option key={idx} value={center}>
-                      {center}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                {...register("senderCenter", { required: true })}
+                className="select select-bordered w-full"
+              >
+                <option value="">Select Service Center</option>
+                {senderCenters.map((center, idx) => (
+                  <option key={idx} value={center}>
+                    {center}
+                  </option>
+                ))}
+              </select>
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Address</span>
-                </label>
-                <input
-                  {...register("senderAddress", { required: true })}
-                  className="input input-bordered"
-                  placeholder="Address"
-                />
-              </div>
+              <input
+                {...register("senderAddress", { required: true })}
+                className="input input-bordered w-full"
+                placeholder="Address"
+              />
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Pickup Instruction</span>
-                </label>
-                <textarea
-                  {...register("pickupInstruction", { required: true })}
-                  className="textarea textarea-bordered"
-                  placeholder="Pickup Instruction"
-                ></textarea>
-              </div>
+              <textarea
+                {...register("pickupInstruction", { required: true })}
+                className="textarea textarea-bordered w-full"
+                placeholder="Pickup Instruction"
+              ></textarea>
             </div>
           </div>
 
@@ -233,83 +216,53 @@ const SendParcel = () => {
           <div className="card bg-base-100 shadow-md p-6">
             <h3 className="text-xl font-semibold mb-4">Receiver Info</h3>
             <div className="grid grid-cols-1 gap-4">
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Receiver Name</span>
-                </label>
-                <input
-                  {...register("receiverName", { required: true })}
-                  className="input input-bordered"
-                  placeholder="Receiver Name"
-                />
-              </div>
+              <input
+                {...register("receiverName", { required: true })}
+                className="input input-bordered w-full"
+                placeholder="Receiver Name"
+              />
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Contact</span>
-                </label>
-                <input
-                  {...register("receiverContact", { required: true })}
-                  className="input input-bordered"
-                  placeholder="Contact"
-                />
-              </div>
+              <input
+                {...register("receiverContact", { required: true })}
+                className="input input-bordered w-full"
+                placeholder="Contact"
+              />
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Region</span>
-                </label>
-                <select
-                  {...register("receiverRegion", { required: true })}
-                  className="select select-bordered"
-                >
-                  <option value="">Select Region</option>
-                  {regionList.map((region, idx) => (
-                    <option key={idx} value={region}>
-                      {region}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                {...register("receiverRegion", { required: true })}
+                className="select select-bordered w-full"
+              >
+                <option value="">Select Region</option>
+                {regionList.map((region, idx) => (
+                  <option key={idx} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </select>
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Service Center</span>
-                </label>
-                <select
-                  {...register("receiverCenter", { required: true })}
-                  className="select select-bordered"
-                >
-                  <option value="">Select Service Center</option>
-                  {receiverCenters.map((center, idx) => (
-                    <option key={idx} value={center}>
-                      {center}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                {...register("receiverCenter", { required: true })}
+                className="select select-bordered w-full"
+              >
+                <option value="">Select Service Center</option>
+                {receiverCenters.map((center, idx) => (
+                  <option key={idx} value={center}>
+                    {center}
+                  </option>
+                ))}
+              </select>
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Address</span>
-                </label>
-                <input
-                  {...register("receiverAddress", { required: true })}
-                  className="input input-bordered"
-                  placeholder="Address"
-                />
-              </div>
+              <input
+                {...register("receiverAddress", { required: true })}
+                className="input input-bordered w-full"
+                placeholder="Address"
+              />
 
-              <div className="form-control">
-                <label className="label mr-2">
-                  <span className="label-text">Delivery Instruction</span>
-                </label>
-                <textarea
-                  {...register("deliveryInstruction", { required: true })}
-                  className="textarea textarea-bordered"
-                  placeholder="Delivery Instruction"
-                ></textarea>
-              </div>
+              <textarea
+                {...register("deliveryInstruction", { required: true })}
+                className="textarea textarea-bordered w-full"
+                placeholder="Delivery Instruction"
+              ></textarea>
             </div>
           </div>
         </div>
@@ -322,12 +275,13 @@ const SendParcel = () => {
         </div>
       </form>
 
+      {/* Confirmation */}
       {showConfirm && (
         <div className="mt-6 text-center space-y-3">
           <p className="text-lg font-bold">Total Delivery Cost: ৳{cost}</p>
           <button
             onClick={handleSubmit(handleConfirm)}
-            className="btn btn-success"
+            className="btn btn-success w-full sm:w-auto"
           >
             Confirm & Save
           </button>
