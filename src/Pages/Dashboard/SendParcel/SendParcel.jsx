@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
-import warehouses from "../../../assets/warehouses.json"
+import warehouses from "../../../assets/warehouses.json";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 import useAuth from "../../../Hooks/useAuth";
@@ -132,21 +132,19 @@ const SendParcel = () => {
       .toString(36)
       .substring(2, 6)
       .toUpperCase()}`;
+
     const parcelData = {
       ...data,
       cost,
       trackingId,
+      created_by: user.email,
       delivery_status: "not_collected",
       status: "Pending",
       creation_date: new Date().toISOString(),
     };
 
-    console.log("Saved Parcel:", parcelData);
-    // send data backend
     axiosSecure.post("/parcels", parcelData).then((res) => {
-      console.log(res.data);
       if (res.data.insertedId) {
-        // TODO: Redirect to payment page
         Swal.fire({
           title: "Redirecting...",
           text: "Proceeding to payment gateway.",
@@ -156,6 +154,7 @@ const SendParcel = () => {
         });
       }
     });
+
     toast.success(`Parcel saved! Tracking ID: ${trackingId}`);
     reset();
   };
