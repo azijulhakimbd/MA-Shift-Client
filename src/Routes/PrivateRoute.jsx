@@ -3,7 +3,7 @@ import useAuth from "../Hooks/useAuth";
 import Spinner from "../Components/Spinner/Spinner";
 import { Navigate } from "react-router";
 
-const PrivateRoute = ({children}) => {
+const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) {
     return Spinner;

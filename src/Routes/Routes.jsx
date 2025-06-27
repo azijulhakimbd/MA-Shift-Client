@@ -6,7 +6,11 @@ import Register from "../Pages/Auth/Register";
 import AuthLayout from "../Layout/AuthLayout";
 import Coverage from "../Pages/Coverage/Coverage";
 import Dashboard from "../Layout/Dashboard";
-import SendParcel from "../Pages/AddParcel/SendParcel";
+
+import PrivateRoute from "./PrivateRoute";
+import MyParcels from "../Pages/Dashboard/MyParcel/MyParcels";
+import SendParcel from "../Pages/Dashboard/SendParcel/SendParcel";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -17,21 +21,28 @@ export const router = createBrowserRouter([
         Component: Home,
       },
       {
-        path:'/coverage',
-        Component:Coverage
-      }
+        path: "/coverage",
+        Component: Coverage,
+      },
     ],
   },
   {
-    path:'/',
-    Component:Dashboard,
-    children:
-    [
+    path: "/dashboard",
+    element: (
+      <PrivateRoute>
+        <Dashboard></Dashboard>
+      </PrivateRoute>
+    ),
+    children: [
       {
-        path: '/Send-Parcel',
+        path: "Send-Parcel",
         Component: SendParcel
-      }
-    ]
+      },
+      {
+        path: "my-parcels",
+        Component: MyParcels,
+      },
+    ],
   },
   {
     path: "/",

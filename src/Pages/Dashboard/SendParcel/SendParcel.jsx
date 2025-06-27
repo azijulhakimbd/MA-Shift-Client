@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
-import warehouses from "../../assets/warehouses.json";
-import useAuth from "../../Hooks/useAuth";
+import warehouses from "../../../assets/warehouses.json"
+import Swal from "sweetalert2";
+import useAxiosSecure from "../../../Hooks/useAxiosSecure";
+import useAuth from "../../../Hooks/useAuth";
 
 const SendParcel = () => {
   const { user } = useAuth();
   const [cost, setCost] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [regionList, setRegionList] = useState([]);
   const [senderCenters, setSenderCenters] = useState([]);
   const [receiverCenters, setReceiverCenters] = useState([]);
-
+  const axiosSecure = useAxiosSecure();
   const {
     register,
     handleSubmit,
@@ -74,28 +75,96 @@ const SendParcel = () => {
   const onSubmit = (data) => {
     const deliveryCost = calculateCost(data);
     setCost(deliveryCost);
-    setShowConfirm(true);
-    toast.success(`Delivery Cost: ৳${deliveryCost}`);
-  };
 
+    const isDocument = data.type === "document";
+    const weight = parseFloat(data.weight) || 0;
+    const sameRegion = data.senderRegion === data.receiverRegion;
+
+    let breakdown = "";
+    if (isDocument) {
+      breakdown = sameRegion
+        ? "Document (within district): ৳60"
+        : "Document (outside district): ৳80";
+    } else if (weight <= 3) {
+      breakdown = sameRegion
+        ? "Non-Document (≤3kg, within district): ৳110"
+        : "Non-Document (≤3kg, outside district): ৳150";
+    } else {
+      const extraWeight = weight - 3;
+      const base = sameRegion ? 110 : 150;
+      const extraCost = extraWeight * 40;
+      const outsideExtra = sameRegion ? 0 : 40;
+      breakdown = `
+      Non-Document (>3kg)<br/>
+      Base: ৳${base}<br/>
+      Extra Weight (${extraWeight}kg × ৳40): ৳${extraCost}<br/>
+      ${outsideExtra ? `Outside District Extra: ৳${outsideExtra}<br/>` : ""}
+    `;
+    }
+
+    Swal.fire({
+      title: "📦 Parcel Cost Summary",
+      html: `
+    <p><strong>Parcel Type:</strong> ${
+      data.type === "document" ? "Document" : "Non-Document"
+    }</p>
+    ${!isDocument ? `<p><strong>Weight:</strong> ${weight} kg</p>` : ""}
+    <p><strong>From:</strong> ${data.senderRegion}</p>
+    <p><strong>To:</strong> ${data.receiverRegion}</p>
+    <hr/>
+    <p><strong>Total Cost:</strong> ৳${deliveryCost}</p>
+    <p>${breakdown}</p>
+  `,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Continue to Payment",
+      cancelButtonText: "Continue Editing",
+      confirmButtonColor: "#10B981",
+      cancelButtonColor: "#FBBF24",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleConfirm(data);
+      }
+    });
+  };
   const handleConfirm = (data) => {
+    const trackingId = `TRK-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 6)
+      .toUpperCase()}`;
     const parcelData = {
       ...data,
       cost,
+      trackingId,
+      delivery_status: "not_collected",
+      status: "Pending",
       creation_date: new Date().toISOString(),
     };
 
     console.log("Saved Parcel:", parcelData);
-    toast.success("Parcel successfully saved!");
+    // send data backend
+    axiosSecure.post("/parcels", parcelData).then((res) => {
+      console.log(res.data);
+      if (res.data.insertedId) {
+        // TODO: Redirect to payment page
+        Swal.fire({
+          title: "Redirecting...",
+          text: "Proceeding to payment gateway.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+    toast.success(`Parcel saved! Tracking ID: ${trackingId}`);
     reset();
-    setShowConfirm(false);
   };
 
   return (
     <div className="min-h-screen container mx-auto px-4 py-8">
       <Toaster position="top-right" />
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold">Add Parcel</h2>
+        <h2 className="text-3xl font-bold">Send a Parcel</h2>
         <p className="text-gray-500">Door to Door Delivery Booking</p>
       </div>
 
@@ -274,19 +343,6 @@ const SendParcel = () => {
           </button>
         </div>
       </form>
-
-      {/* Confirmation */}
-      {showConfirm && (
-        <div className="mt-6 text-center space-y-3">
-          <p className="text-lg font-bold">Total Delivery Cost: ৳{cost}</p>
-          <button
-            onClick={handleSubmit(handleConfirm)}
-            className="btn btn-success w-full sm:w-auto"
-          >
-            Confirm & Save
-          </button>
-        </div>
-      )}
     </div>
   );
 };
