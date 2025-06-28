@@ -23,7 +23,7 @@ const Navbar = () => {
         <NavLink to={"/Pricing"}>Pricing</NavLink>
       </li>
       <li>
-        <NavLink to={"/Be-a-Rider"}>Be a Rider</NavLink>
+        <NavLink to={"/dashboard"}>Dashboard</NavLink>
       </li>
     </>
   );

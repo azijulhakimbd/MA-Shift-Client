@@ -5,11 +5,12 @@ import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 import moment from "moment";
 import Swal from "sweetalert2";
 import { FaEye, FaTrash, FaMoneyCheckAlt } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 const MyParcels = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-
+  const navigate = useNavigate();
   const { data: parcels = [], refetch } = useQuery({
     queryKey: ["my-parcels", user.email],
     queryFn: async () => {
@@ -18,63 +19,79 @@ const MyParcels = () => {
     },
   });
 
+  // View
   const handleView = (parcel) => {
     Swal.fire({
       title: parcel.title,
       html: `
         <p><strong>Tracking ID:</strong> ${parcel.trackingId}</p>
         <p><strong>Type:</strong> ${parcel.type}</p>
-        <p><strong>Sender:</strong> ${parcel.senderName} (${parcel.senderContact})</p>
-        <p><strong>Receiver:</strong> ${parcel.receiverName} (${parcel.receiverContact})</p>
+        <p><strong>Sender:</strong> ${parcel.senderName} (${
+        parcel.senderContact
+      })</p>
+        <p><strong>Receiver:</strong> ${parcel.receiverName} (${
+        parcel.receiverContact
+      })</p>
         <p><strong>Cost:</strong> ৳${parcel.cost ?? "N/A"}</p>
         <p><strong>Status:</strong> ${parcel.status}</p>
-        <p><strong>Created:</strong> ${moment(parcel.creation_date).format("LLL")}</p>
+        <p><strong>Created:</strong> ${moment(parcel.creation_date).format(
+          "LLL"
+        )}</p>
       `,
       icon: "info",
       confirmButtonColor: "#0ea5e9",
     });
   };
 
+  // Pay
   const handlePay = async (parcel) => {
-    const result = await Swal.fire({
-      title: "Confirm Payment",
-      text: `Pay ৳${parcel.cost} for this parcel?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Pay",
-      confirmButtonColor: "#10b981",
-    });
+    navigate(`/dashboard/payment/${parcel._id}`)
+  }; 
 
-    if (result.isConfirmed) {
-      // Add real API call here
-      Swal.fire("Paid!", "Payment processed.", "success");
-    }
-  };
-
+  // Delete
   const handleDelete = async (parcel) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "You cannot recover this parcel once deleted!",
+      text: `Parcel "${parcel.title}" will be permanently deleted!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, Delete",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
       confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
     });
 
     if (result.isConfirmed) {
       try {
-        await axiosSecure.delete(`/parcels/${parcel._id}`);
-        Swal.fire("Deleted!", "Parcel has been removed.", "success");
-        refetch();
+        const response = await axiosSecure.delete(`/parcels/${parcel._id}`);
+        if (response.data.deletedCount > 0) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Parcel has been successfully removed.",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+          refetch(); // Refresh the list
+        } else {
+          throw new Error("Nothing was deleted");
+        }
       } catch (error) {
-        Swal.fire("Error", "Failed to delete parcel.", "error");
+        console.error("Delete error:", error);
+        Swal.fire(
+          "Error",
+          "Failed to delete parcel. Try again later.",
+          "error"
+        );
       }
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">📦 My Parcels</h2>
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+        📦 My Parcels
+      </h2>
 
       <div className="overflow-x-auto shadow-md rounded-lg bg-base-100">
         <table className="table w-full text-sm md:text-base">
@@ -96,7 +113,9 @@ const MyParcels = () => {
                   <td>{idx + 1}</td>
                   <td className="max-w-[180px] truncate">{parcel.title}</td>
                   <td className="capitalize">{parcel.type}</td>
-                  <td>{moment(parcel.creation_date).format("YYYY-MM-DD HH:mm")}</td>
+                  <td>
+                    {moment(parcel.creation_date).format("YYYY-MM-DD HH:mm")}
+                  </td>
                   <td>৳ {parcel.cost}</td>
                   <td>
                     <span
@@ -106,7 +125,9 @@ const MyParcels = () => {
                           : "badge-error"
                       } text-white`}
                     >
-                      {parcel.status?.toLowerCase() === "paid" ? "Paid" : "Unpaid"}
+                      {parcel.status?.toLowerCase() === "paid"
+                        ? "Paid"
+                        : "Unpaid"}
                     </span>
                   </td>
                   <td className="flex flex-wrap gap-2 justify-center">
