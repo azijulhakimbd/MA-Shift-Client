@@ -120,12 +120,12 @@ const MyParcels = () => {
                   <td>
                     <span
                       className={`badge ${
-                        parcel.status?.toLowerCase() === "paid"
+                        parcel.payment_status?.toLowerCase() === "paid"
                           ? "badge-success"
                           : "badge-error"
                       } text-white`}
                     >
-                      {parcel.status?.toLowerCase() === "paid"
+                      {parcel.payment_status?.toLowerCase() === "paid"
                         ? "Paid"
                         : "Unpaid"}
                     </span>

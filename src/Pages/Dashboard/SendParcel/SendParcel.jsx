@@ -8,11 +8,11 @@ import useAuth from "../../../Hooks/useAuth";
 
 const SendParcel = () => {
   const { user } = useAuth();
-  const [cost, setCost] = useState(null);
   const [regionList, setRegionList] = useState([]);
   const [senderCenters, setSenderCenters] = useState([]);
   const [receiverCenters, setReceiverCenters] = useState([]);
   const axiosSecure = useAxiosSecure();
+
   const {
     register,
     handleSubmit,
@@ -27,7 +27,6 @@ const SendParcel = () => {
     },
   });
 
-  // Update sender name when user is available
   useEffect(() => {
     if (user?.displayName) {
       setValue("senderName", user.displayName);
@@ -58,23 +57,18 @@ const SendParcel = () => {
     const weight = parseFloat(data.weight) || 0;
     const sameRegion = data.senderRegion === data.receiverRegion;
 
-    if (isDocument) {
-      return sameRegion ? 60 : 80;
-    }
+    if (isDocument) return sameRegion ? 60 : 80;
 
-    if (weight <= 3) {
-      return sameRegion ? 110 : 150;
-    } else {
-      const extraWeightCost = (weight - 3) * 40;
-      const base = sameRegion ? 110 : 150;
-      const outsideExtra = sameRegion ? 0 : 40;
-      return base + extraWeightCost + outsideExtra;
-    }
+    if (weight <= 3) return sameRegion ? 110 : 150;
+
+    const extraWeightCost = (weight - 3) * 40;
+    const base = sameRegion ? 110 : 150;
+    const outsideExtra = sameRegion ? 0 : 40;
+    return base + extraWeightCost + outsideExtra;
   };
 
   const onSubmit = (data) => {
     const deliveryCost = calculateCost(data);
-    setCost(deliveryCost);
 
     const isDocument = data.type === "document";
     const weight = parseFloat(data.weight) || 0;
@@ -95,26 +89,26 @@ const SendParcel = () => {
       const extraCost = extraWeight * 40;
       const outsideExtra = sameRegion ? 0 : 40;
       breakdown = `
-      Non-Document (>3kg)<br/>
-      Base: ৳${base}<br/>
-      Extra Weight (${extraWeight}kg × ৳40): ৳${extraCost}<br/>
-      ${outsideExtra ? `Outside District Extra: ৳${outsideExtra}<br/>` : ""}
-    `;
+        Non-Document (>3kg)<br/>
+        Base: ৳${base}<br/>
+        Extra Weight (${extraWeight}kg × ৳40): ৳${extraCost}<br/>
+        ${outsideExtra ? `Outside District Extra: ৳${outsideExtra}<br/>` : ""}
+      `;
     }
 
     Swal.fire({
       title: "📦 Parcel Cost Summary",
       html: `
-    <p><strong>Parcel Type:</strong> ${
-      data.type === "document" ? "Document" : "Non-Document"
-    }</p>
-    ${!isDocument ? `<p><strong>Weight:</strong> ${weight} kg</p>` : ""}
-    <p><strong>From:</strong> ${data.senderRegion}</p>
-    <p><strong>To:</strong> ${data.receiverRegion}</p>
-    <hr/>
-    <p><strong>Total Cost:</strong> ৳${deliveryCost}</p>
-    <p>${breakdown}</p>
-  `,
+        <p><strong>Parcel Type:</strong> ${
+          isDocument ? "Document" : "Non-Document"
+        }</p>
+        ${!isDocument ? `<p><strong>Weight:</strong> ${weight} kg</p>` : ""}
+        <p><strong>From:</strong> ${data.senderRegion}</p>
+        <p><strong>To:</strong> ${data.receiverRegion}</p>
+        <hr/>
+        <p><strong>Total Cost:</strong> ৳${deliveryCost}</p>
+        <p>${breakdown}</p>
+      `,
       icon: "info",
       showCancelButton: true,
       confirmButtonText: "Continue to Payment",
@@ -123,11 +117,12 @@ const SendParcel = () => {
       cancelButtonColor: "#FBBF24",
     }).then((result) => {
       if (result.isConfirmed) {
-        handleConfirm(data);
+        handleConfirm(data, deliveryCost); 
       }
     });
   };
-  const handleConfirm = (data) => {
+
+  const handleConfirm = (data, finalCost) => {
     const trackingId = `TRK-${Date.now()}-${Math.random()
       .toString(36)
       .substring(2, 6)
@@ -135,10 +130,11 @@ const SendParcel = () => {
 
     const parcelData = {
       ...data,
-      cost,
+      cost: finalCost,
       trackingId,
       created_by: user.email,
       delivery_status: "not_collected",
+      payment_status:"unpaid",
       status: "Pending",
       creation_date: new Date().toISOString(),
     };
@@ -152,11 +148,10 @@ const SendParcel = () => {
           timer: 1500,
           showConfirmButton: false,
         });
+        toast.success(`Parcel saved! Tracking ID: ${trackingId}`);
+        reset();
       }
     });
-
-    toast.success(`Parcel saved! Tracking ID: ${trackingId}`);
-    reset();
   };
 
   return (
@@ -235,13 +230,11 @@ const SendParcel = () => {
                 readOnly
                 placeholder="Sender Name"
               />
-
               <input
                 {...register("senderContact", { required: true })}
                 className="input input-bordered w-full"
                 placeholder="Contact"
               />
-
               <select
                 {...register("senderRegion", { required: true })}
                 className="select select-bordered w-full"
@@ -253,7 +246,6 @@ const SendParcel = () => {
                   </option>
                 ))}
               </select>
-
               <select
                 {...register("senderCenter", { required: true })}
                 className="select select-bordered w-full"
@@ -265,13 +257,11 @@ const SendParcel = () => {
                   </option>
                 ))}
               </select>
-
               <input
                 {...register("senderAddress", { required: true })}
                 className="input input-bordered w-full"
                 placeholder="Address"
               />
-
               <textarea
                 {...register("pickupInstruction", { required: true })}
                 className="textarea textarea-bordered w-full"
@@ -289,13 +279,11 @@ const SendParcel = () => {
                 className="input input-bordered w-full"
                 placeholder="Receiver Name"
               />
-
               <input
                 {...register("receiverContact", { required: true })}
                 className="input input-bordered w-full"
                 placeholder="Contact"
               />
-
               <select
                 {...register("receiverRegion", { required: true })}
                 className="select select-bordered w-full"
@@ -307,7 +295,6 @@ const SendParcel = () => {
                   </option>
                 ))}
               </select>
-
               <select
                 {...register("receiverCenter", { required: true })}
                 className="select select-bordered w-full"
@@ -319,13 +306,11 @@ const SendParcel = () => {
                   </option>
                 ))}
               </select>
-
               <input
                 {...register("receiverAddress", { required: true })}
                 className="input input-bordered w-full"
                 placeholder="Address"
               />
-
               <textarea
                 {...register("deliveryInstruction", { required: true })}
                 className="textarea textarea-bordered w-full"
