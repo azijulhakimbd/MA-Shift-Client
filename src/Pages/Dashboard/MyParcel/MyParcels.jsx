@@ -6,18 +6,23 @@ import moment from "moment";
 import Swal from "sweetalert2";
 import { FaEye, FaTrash, FaMoneyCheckAlt } from "react-icons/fa";
 import { useNavigate } from "react-router";
+import Spinner from "../../../Components/Spinner/Spinner"; 
 
 const MyParcels = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
-  const { data: parcels = [], refetch } = useQuery({
+
+  const { data: parcels = [], isLoading, refetch } = useQuery({
     queryKey: ["my-parcels", user.email],
     queryFn: async () => {
       const res = await axiosSecure.get(`/parcels?email=${user.email}`);
       return res.data;
     },
   });
+
+  // Spinner during loading
+  if (isLoading) return <Spinner />;
 
   // View
   const handleView = (parcel) => {
@@ -26,17 +31,11 @@ const MyParcels = () => {
       html: `
         <p><strong>Tracking ID:</strong> ${parcel.trackingId}</p>
         <p><strong>Type:</strong> ${parcel.type}</p>
-        <p><strong>Sender:</strong> ${parcel.senderName} (${
-        parcel.senderContact
-      })</p>
-        <p><strong>Receiver:</strong> ${parcel.receiverName} (${
-        parcel.receiverContact
-      })</p>
+        <p><strong>Sender:</strong> ${parcel.senderName} (${parcel.senderContact})</p>
+        <p><strong>Receiver:</strong> ${parcel.receiverName} (${parcel.receiverContact})</p>
         <p><strong>Cost:</strong> ৳${parcel.cost ?? "N/A"}</p>
         <p><strong>Status:</strong> ${parcel.status}</p>
-        <p><strong>Created:</strong> ${moment(parcel.creation_date).format(
-          "LLL"
-        )}</p>
+        <p><strong>Created:</strong> ${moment(parcel.creation_date).format("LLL")}</p>
       `,
       icon: "info",
       confirmButtonColor: "#0ea5e9",
@@ -44,9 +43,9 @@ const MyParcels = () => {
   };
 
   // Pay
-  const handlePay = async (parcel) => {
-    navigate(`/dashboard/payment/${parcel._id}`)
-  }; 
+  const handlePay = (parcel) => {
+    navigate(`/dashboard/payment/${parcel._id}`);
+  };
 
   // Delete
   const handleDelete = async (parcel) => {
@@ -72,26 +71,20 @@ const MyParcels = () => {
             timer: 1500,
             showConfirmButton: false,
           });
-          refetch(); // Refresh the list
+          refetch();
         } else {
           throw new Error("Nothing was deleted");
         }
       } catch (error) {
         console.error("Delete error:", error);
-        Swal.fire(
-          "Error",
-          "Failed to delete parcel. Try again later.",
-          "error"
-        );
+        Swal.fire("Error", "Failed to delete parcel. Try again later.", "error");
       }
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-        📦 My Parcels
-      </h2>
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">📦 My Parcels</h2>
 
       <div className="overflow-x-auto shadow-md rounded-lg bg-base-100">
         <table className="table w-full text-sm md:text-base">
@@ -113,9 +106,7 @@ const MyParcels = () => {
                   <td>{idx + 1}</td>
                   <td className="max-w-[180px] truncate">{parcel.title}</td>
                   <td className="capitalize">{parcel.type}</td>
-                  <td>
-                    {moment(parcel.creation_date).format("YYYY-MM-DD HH:mm")}
-                  </td>
+                  <td>{moment(parcel.creation_date).format("YYYY-MM-DD HH:mm")}</td>
                   <td>৳ {parcel.cost}</td>
                   <td>
                     <span
@@ -125,16 +116,11 @@ const MyParcels = () => {
                           : "badge-error"
                       } text-white`}
                     >
-                      {parcel.payment_status?.toLowerCase() === "paid"
-                        ? "Paid"
-                        : "Unpaid"}
+                      {parcel.payment_status?.toLowerCase() === "paid" ? "Paid" : "Unpaid"}
                     </span>
                   </td>
                   <td className="flex flex-wrap gap-2 justify-center">
-                    <button
-                      onClick={() => handleView(parcel)}
-                      className="btn btn-sm btn-info"
-                    >
+                    <button onClick={() => handleView(parcel)} className="btn btn-sm btn-info">
                       <FaEye className="mr-1" /> View
                     </button>
                     <button
@@ -144,10 +130,7 @@ const MyParcels = () => {
                     >
                       <FaMoneyCheckAlt className="mr-1" /> Pay
                     </button>
-                    <button
-                      onClick={() => handleDelete(parcel)}
-                      className="btn btn-sm btn-error"
-                    >
+                    <button onClick={() => handleDelete(parcel)} className="btn btn-sm btn-error">
                       <FaTrash className="mr-1" /> Delete
                     </button>
                   </td>
@@ -155,7 +138,7 @@ const MyParcels = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-500">
+                <td colSpan="7" className="text-center py-6 text-gray-500">
                   No parcels found.
                 </td>
               </tr>

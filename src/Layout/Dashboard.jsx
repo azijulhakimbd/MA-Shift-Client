@@ -54,7 +54,7 @@ const Dashboard = () => {
           <li>
             <Link
               to="/dashboard/"
-              className="flex items-center pt-5 gap-3 text-green-600 hover:text-green-800 transition"
+              className="flex items-center mt-5 gap-3 text-green-600 hover:text-green-800 transition"
             >
               <FaHome className="text-xl" /> Home
             </Link>
