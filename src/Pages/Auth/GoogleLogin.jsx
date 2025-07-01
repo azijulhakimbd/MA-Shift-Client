@@ -1,16 +1,27 @@
 import { useLocation, useNavigate } from "react-router";
 import useAuth from "../../Hooks/useAuth";
+import useAxios from "../../Hooks/useAxios";
 
 const GoogleLogin = () => {
   const { googleSignIn } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const from =location.state?.from || '/';
+  const axiosInstance=useAxios();
 
   const handleSubmit = () => {
     googleSignIn()
-      .then((res) => {
-        console.log(res.user);
+      .then(async(res) => {
+        const user=res.user;
+        const userinfo = {
+          email: user.email,
+          role: "user",
+          created_at: new Date().toISOString(),
+          last_login: new Date().toISOString(),
+        };
+        const userRes = await axiosInstance.post('/users',userinfo)
+        console.log(userRes.data);
+        
         navigate(from)
       })
       .catch((error) => {
