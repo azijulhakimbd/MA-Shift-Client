@@ -85,7 +85,7 @@ const Navbar = () => {
       <div className="navbar-end">
         {user ? (
           <>
-            <NavLink className="btn rounded-3xl mr-1 bg-custom text-white" to="/">
+            <NavLink className="btn rounded-3xl mr-1 bg-custom text-white" to="be-a-rider">
               <GiDeliveryDrone size={18} className="mr-1 text-white" /> Be a Rider
             </NavLink>
             <button
