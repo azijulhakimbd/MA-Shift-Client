@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import Swal from "sweetalert2";
 import useAuth from "../../../Hooks/useAuth";
 import warehouses from "../../../assets/warehouses.json";
 import Rider from "../../../assets/agent-pending.png";
+import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 
 const BeARider = () => {
   const { user } = useAuth();
   const [regions, setRegions] = useState([]);
   const [cities, setCities] = useState([]);
-  const [warehouseOptions, setWarehouseOptions] = useState([]); // ✅ FIXED
   const [coveredAreas, setCoveredAreas] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const axiosSecure = useAxiosSecure();
 
   const {
     register,
@@ -37,17 +38,13 @@ const BeARider = () => {
 
   const handleRegionChange = (e) => {
     const selectedRegion = e.target.value;
-    const filteredByRegion = warehouses.filter(
-      (w) => w.region === selectedRegion
-    );
+    const filteredByRegion = warehouses.filter((w) => w.region === selectedRegion);
     const uniqueCities = [...new Set(filteredByRegion.map((w) => w.city))];
 
     setCities(uniqueCities);
-    setWarehouseOptions([]);
     setCoveredAreas([]);
     setValue("region", selectedRegion);
     setValue("city", "");
-    setValue("warehouse", "");
     setValue("covered_area", "");
   };
 
@@ -59,38 +56,35 @@ const BeARider = () => {
       (w) => w.region === selectedRegion && w.city === selectedCity
     );
 
-    const warehouseNames = filtered.map((w) => w.warehouse);
-    const allCoveredAreas = [
-      ...new Set(filtered.flatMap((w) => w.covered_area)),
-    ];
+    const allCoveredAreas = [...new Set(filtered.flatMap((w) => w.covered_area))];
 
-    setWarehouseOptions(warehouseNames);
     setCoveredAreas(allCoveredAreas);
-    setValue("warehouse", "");
     setValue("covered_area", "");
   };
 
   const onSubmit = async (data) => {
     setLoading(true);
+    const riderData = {
+      ...data,
+      name: user?.displayName || "",
+      email: user?.email || "",
+      status: "pending",
+      created_at: new Date().toISOString(),
+    };
     try {
-      const res = await axios.post(`/riders`, data);
-      if (res.data.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Application Submitted!",
-          text: "Your rider application has been received.",
-          timer: 3000,
-          showConfirmButton: false,
-        });
-        reset();
-      } else {
-        throw new Error("Submission failed");
-      }
+      const res = await axiosSecure.post("/riders", riderData);
+      console.log(res.data.insertedId);
+      Swal.fire({
+        icon: "success",
+        title: "Application Submitted!",
+        text: "Your Application is pending approval.",
+      });
+      reset();
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Oops!",
-        text: "Something went wrong. Please try again.",
+        title: "Submission Failed",
+        text: error.message || "Please try again later.",
       });
     } finally {
       setLoading(false);
@@ -116,7 +110,7 @@ const BeARider = () => {
               <input
                 type="text"
                 {...register("name", { required: true })}
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-gray-100 cursor-not-allowed"
                 readOnly
               />
               <input
@@ -125,10 +119,13 @@ const BeARider = () => {
                 {...register("age", { required: true, min: 18 })}
                 className="input input-bordered w-full"
               />
+              {errors.age && (
+                <p className="text-red-500 text-sm">Age must be at least 18</p>
+              )}
               <input
                 type="email"
                 {...register("email", { required: true })}
-                className="input input-bordered w-full"
+                className="input input-bordered w-full bg-gray-100 cursor-not-allowed"
                 readOnly
               />
               <select
@@ -143,10 +140,14 @@ const BeARider = () => {
                   </option>
                 ))}
               </select>
+              {errors.region && (
+                <p className="text-red-500 text-sm">Region is required</p>
+              )}
               <select
                 {...register("city", { required: true })}
                 className="select select-bordered w-full"
                 onChange={handleCityChange}
+                disabled={!selectedRegion}
               >
                 <option value="">Select your city</option>
                 {cities.map((city) => (
@@ -155,35 +156,33 @@ const BeARider = () => {
                   </option>
                 ))}
               </select>
+              {errors.city && (
+                <p className="text-red-500 text-sm">City is required</p>
+              )}
               <input
-                type="text"
+                type="number"
                 placeholder="NID No"
                 {...register("nid", { required: true })}
                 className="input input-bordered w-full"
               />
+              {errors.nid && (
+                <p className="text-red-500 text-sm">NID No is required</p>
+              )}
               <input
-                type="text"
+                type="number"
                 placeholder="Contact"
                 {...register("contact", { required: true })}
                 className="input input-bordered w-full"
               />
+              {errors.contact && (
+                <p className="text-red-500 text-sm">Contact is required</p>
+              )}
             </div>
-
-            <select
-              {...register("warehouse", { required: true })}
-              className="select select-bordered w-full"
-            >
-              <option value="">Select district</option>
-              {warehouseOptions.map((district) => (
-                <option key={district} value={district}>
-                  {district}
-                </option>
-              ))}
-            </select>
 
             <select
               {...register("covered_area", { required: true })}
               className="select select-bordered w-full"
+              disabled={coveredAreas.length === 0}
             >
               <option value="">Select covered area</option>
               {coveredAreas.map((area) => (
@@ -192,6 +191,9 @@ const BeARider = () => {
                 </option>
               ))}
             </select>
+            {errors.covered_area && (
+              <p className="text-red-500 text-sm">Covered area is required</p>
+            )}
 
             <button
               type="submit"

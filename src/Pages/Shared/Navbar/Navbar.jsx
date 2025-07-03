@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router"; 
+import { NavLink } from "react-router";
 import MAShiftLogo from "../MaShiftLogo/MAShiftLogo";
 import useAuth from "../../../Hooks/useAuth";
 
@@ -35,7 +35,8 @@ const Navbar = () => {
       </li>
       <li>
         <NavLink to="/About-Us">
-          <AiFillInfoCircle size={20} className="mr-1 text-orange-500" /> About Us
+          <AiFillInfoCircle size={20} className="mr-1 text-orange-500" /> About
+          Us
         </NavLink>
       </li>
       <li>
@@ -45,9 +46,11 @@ const Navbar = () => {
       </li>
       <li>
         <NavLink to="/dashboard">
-          <MdOutlineDashboard size={20} className="mr-1 text-purple-600" /> Dashboard
+          <MdOutlineDashboard size={20} className="mr-1 text-purple-600" />{" "}
+          Dashboard
         </NavLink>
       </li>
+      
     </>
   );
 
@@ -85,8 +88,12 @@ const Navbar = () => {
       <div className="navbar-end">
         {user ? (
           <>
-            <NavLink className="btn rounded-3xl mr-1 bg-custom text-white" to="be-a-rider">
-              <GiDeliveryDrone size={18} className="mr-1 text-white" /> Be a Rider
+            <NavLink
+              className="btn rounded-3xl mr-1 bg-custom text-white"
+              to="be-a-rider"
+            >
+              <GiDeliveryDrone size={18} className="mr-1 text-white" /> Be a
+              Rider
             </NavLink>
             <button
               className="text-red-500 btn btn-outline rounded-4xl"

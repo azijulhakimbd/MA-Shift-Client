@@ -6,7 +6,7 @@ import {
   FaPaperPlane,
   FaMoneyCheckAlt,
   FaSearchLocation,
-  FaUserEdit,
+  FaUserEdit,FaUserCheck, FaUserClock
 } from "react-icons/fa";
 import MAShiftLogo from "../Pages/Shared/MaShiftLogo/MAShiftLogo";
 const Dashboard = () => {
@@ -97,6 +97,18 @@ const Dashboard = () => {
               className="flex items-center gap-3 text-pink-600 hover:text-pink-800 transition"
             >
               <FaUserEdit className="text-xl" /> Update Profile
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/active-riders">
+              <FaUserCheck size={20} className="mr-1 text-green-500" /> Active
+              Riders
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard/pending-riders">
+              <FaUserClock size={20} className="mr-1 text-yellow-500" /> Pending
+              Riders
             </Link>
           </li>
         </ul>
