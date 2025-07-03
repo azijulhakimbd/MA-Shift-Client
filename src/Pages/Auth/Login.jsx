@@ -88,7 +88,7 @@ const Login = () => {
 
         <div className="mt-4 text-sm text-center">
           Don’t have any account?{" "}
-          <Link
+          <Link state={{from}}
             className="text-green-600 hover:underline font-medium"
             to={"/register"}
           >

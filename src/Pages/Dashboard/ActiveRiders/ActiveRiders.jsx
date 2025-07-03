@@ -82,6 +82,7 @@ const ActiveRiders = () => {
               <th>Phone</th>
               <th>Region</th>
               <th>City</th>
+              <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -95,6 +96,7 @@ const ActiveRiders = () => {
                   <td>{rider.contact || "N/A"}</td>
                   <td>{rider.region}</td>
                   <td>{rider.city}</td>
+                  <td>{rider.status}</td>
                   <td className="flex gap-1 flex-wrap">
                     <button
                       title="View Details"

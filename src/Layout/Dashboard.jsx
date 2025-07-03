@@ -6,8 +6,11 @@ import {
   FaPaperPlane,
   FaMoneyCheckAlt,
   FaSearchLocation,
-  FaUserEdit,FaUserCheck, FaUserClock
+  FaUserEdit,
+  FaUserCheck,
+  FaUserClock,
 } from "react-icons/fa";
+import { MdAdminPanelSettings } from "react-icons/md";
 import MAShiftLogo from "../Pages/Shared/MaShiftLogo/MAShiftLogo";
 const Dashboard = () => {
   return (
@@ -100,15 +103,24 @@ const Dashboard = () => {
             </Link>
           </li>
           <li>
-            <Link to="/dashboard/active-riders">
-              <FaUserCheck size={20} className="mr-1 text-green-500" /> Active
+            <Link className="mr-1 text-green-400" to="/dashboard/active-riders">
+              <FaUserCheck size={20}  /> Active
               Riders
             </Link>
           </li>
           <li>
-            <Link to="/dashboard/pending-riders">
-              <FaUserClock size={20} className="mr-1 text-yellow-500" /> Pending
+            <Link className="mr-1 text-yellow-500" to="/dashboard/pending-riders">
+              <FaUserClock size={20}  /> Pending
               Riders
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/make-admin"
+              size={20} className="mr-1 text-green-500"
+            >
+              <MdAdminPanelSettings className="text-xl" />
+              <span>Make Admin</span>
             </Link>
           </li>
         </ul>
