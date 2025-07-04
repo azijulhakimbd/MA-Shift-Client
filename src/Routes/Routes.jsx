@@ -18,6 +18,8 @@ import BeARider from "../Pages/Dashboard/BeARider/BeARider";
 import PendingRiders from "../Pages/Dashboard/PendingRiders/PendingRiders";
 import ActiveRiders from "../Pages/Dashboard/ActiveRiders/ActiveRiders";
 import MakeAdmin from "../Pages/Dashboard/MakeAdmin/MakeAdmin";
+import Permission from "../Pages/Permission/Permission";
+import AdminRoute from "./AdminRoute";
 
 export const router = createBrowserRouter([
   {
@@ -33,11 +35,17 @@ export const router = createBrowserRouter([
         Component: Coverage,
       },
       {
-        path:'/be-a-rider',
-        element: <PrivateRoute>
-          <BeARider></BeARider>
-        </PrivateRoute>
-      }
+        path: "/be-a-rider",
+        element: (
+          <PrivateRoute>
+            <BeARider></BeARider>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "no-permission-to-access",
+        Component: Permission,
+      },
     ],
   },
   {
@@ -50,36 +58,48 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "Send-Parcel",
-        Component: SendParcel
+        Component: SendParcel,
       },
       {
         path: "my-parcels",
         Component: MyParcels,
       },
       {
-        path:'payment-history',
-        Component: PaymentHistory
+        path: "payment-history",
+        Component: PaymentHistory,
       },
       {
-        path:'track-parcel',
-        Component: TrackParcel
+        path: "track-parcel",
+        Component: TrackParcel,
       },
       {
-        path:'payment/:parcelId',
-        Component:Payment
+        path: "payment/:parcelId",
+        Component: Payment,
       },
       {
-        path:'pending-riders',
-        Component: PendingRiders
+        path: "pending-riders",
+        element: (
+          <AdminRoute>
+            <PendingRiders></PendingRiders>
+          </AdminRoute>
+        ),
       },
       {
-        path:'active-riders',
-        Component: ActiveRiders
+        path: "active-riders",
+        element: (
+          <AdminRoute>
+            <ActiveRiders></ActiveRiders>
+          </AdminRoute>
+        ),
       },
       {
-        path:'make-admin',
-        Component:MakeAdmin
-      }
+        path: "make-admin",
+        element: (
+          <AdminRoute>
+            <MakeAdmin></MakeAdmin>
+          </AdminRoute>
+        ),
+      },
     ],
   },
   {
@@ -97,7 +117,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path:'/*',
-    Component: ErrorPage
-  }
+    path: "/*",
+    Component: ErrorPage,
+  },
 ]);

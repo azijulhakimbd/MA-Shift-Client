@@ -89,7 +89,7 @@ const Navbar = () => {
         {user ? (
           <>
             <NavLink
-              className="btn rounded-3xl mr-1 bg-custom text-white"
+              className="btn rounded-3xl mr-1 bg-yellow-400"
               to="be-a-rider"
             >
               <GiDeliveryDrone size={18} className="mr-1 text-white" /> Be a

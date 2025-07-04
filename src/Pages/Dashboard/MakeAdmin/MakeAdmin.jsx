@@ -5,23 +5,27 @@ import { useQuery } from "@tanstack/react-query";
 
 const MakeAdmin = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [queryKey, setQueryKey] = useState(""); // trigger query manually
+  const [queryKey, setQueryKey] = useState("");
   const axiosSecure = useAxiosSecure();
 
-  // TanStack Query
-  const { data: users = [], isLoading, isError, refetch } = useQuery({
+  const {
+    data: users = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["search-user", queryKey],
-    enabled: !!queryKey, // only run when queryKey is set
+    enabled: !!queryKey,
     queryFn: async () => {
       const res = await axiosSecure.get(`/users/email/${queryKey}`);
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [res.data]; // ensure array
     },
   });
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
-    setQueryKey(searchTerm.trim()); // trigger query
+    setQueryKey(searchTerm.trim());
   };
 
   const handleMakeAdmin = async (email) => {
@@ -41,8 +45,10 @@ const MakeAdmin = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded">
-      <h2 className="text-2xl font-bold mb-4">Manage Admin Access</h2>
+    <div className=" mx-auto p-10 bg-white shadow-md rounded">
+      <h2 className="text-4xl font-bold mb-10">Manage Admin Access</h2>
+
+      {/* Search Form */}
       <form onSubmit={handleSearch} className="flex gap-2 mb-6">
         <input
           type="text"
@@ -61,41 +67,57 @@ const MakeAdmin = () => {
         </button>
       </form>
 
+      {/* Error */}
       {isError && (
-        <p className="text-red-500 text-sm">Error fetching users</p>
+        <p className="text-red-500 text-sm mb-4">Error fetching users.</p>
       )}
 
-      {users.length > 0 && (
-        <div className="space-y-4">
-          {users.map((user) => (
-            <div
-              key={user.email}
-              className=" p-4 rounded bg-gray-100"
-            >
-              <p><strong>Email:</strong> {user.email}</p>
-              <p><strong>Role:</strong> {user.role}</p>
-              <p><strong>Created At:</strong> {new Date(user.created_at).toLocaleString()}</p>
-
-              <div className="mt-4">
-                {user.role === "admin" ? (
-                  <button
-                    onClick={() => handleRemoveAdmin(user.email)}
-                    className="btn btn-warning"
-                  >
-                    Remove Admin
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleMakeAdmin(user.email)}
-                    className="btn btn-success"
-                  >
-                    Make Admin
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+      {/* Result Table */}
+      {users.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="table w-full">
+            <thead className="bg-base-200">
+              <tr>
+                <th>#</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Created At</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user, idx) => (
+                <tr key={user.email}>
+                  <td>{idx + 1}</td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                  <td>{new Date(user.created_at).toLocaleString()}</td>
+                  <td>
+                    {user.role === "admin" ? (
+                      <button
+                        onClick={() => handleRemoveAdmin(user.email)}
+                        className="btn btn-sm btn-warning"
+                      >
+                        Remove Admin
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleMakeAdmin(user.email)}
+                        className="btn btn-sm btn-success"
+                      >
+                        Make Admin
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      ) : (
+        queryKey && !isLoading && (
+          <p className="text-center text-gray-500 mt-6">No users found.</p>
+        )
       )}
     </div>
   );

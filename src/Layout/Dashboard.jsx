@@ -12,7 +12,13 @@ import {
 } from "react-icons/fa";
 import { MdAdminPanelSettings } from "react-icons/md";
 import MAShiftLogo from "../Pages/Shared/MaShiftLogo/MAShiftLogo";
+import useUserRole from "../Hooks/useUserRole.jsx";
+import Spinner from "../Components/Spinner/Spinner.jsx";
 const Dashboard = () => {
+  const { role, isLoading } = useUserRole();
+  if (isLoading) {
+    return Spinner
+  }
   return (
     <div className="drawer lg:drawer-open">
       <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
@@ -102,27 +108,36 @@ const Dashboard = () => {
               <FaUserEdit className="text-xl" /> Update Profile
             </Link>
           </li>
-          <li>
-            <Link className="mr-1 text-green-400" to="/dashboard/active-riders">
-              <FaUserCheck size={20}  /> Active
-              Riders
-            </Link>
-          </li>
-          <li>
-            <Link className="mr-1 text-yellow-500" to="/dashboard/pending-riders">
-              <FaUserClock size={20}  /> Pending
-              Riders
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/dashboard/make-admin"
-              size={20} className="mr-1 text-green-500"
-            >
-              <MdAdminPanelSettings className="text-xl" />
-              <span>Make Admin</span>
-            </Link>
-          </li>
+          {!isLoading && role === 'admin' && (
+            <>
+              <li>
+                <Link
+                  className="mr-1 text-green-400"
+                  to="/dashboard/active-riders"
+                >
+                  <FaUserCheck size={20} /> Active Riders
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="mr-1 text-yellow-500"
+                  to="/dashboard/pending-riders"
+                >
+                  <FaUserClock size={20} /> Pending Riders
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/dashboard/make-admin"
+                  size={20}
+                  className="mr-1 text-green-500"
+                >
+                  <MdAdminPanelSettings className="text-xl" />
+                  <span>Make Admin</span>
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </div>
