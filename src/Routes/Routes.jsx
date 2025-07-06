@@ -20,6 +20,7 @@ import ActiveRiders from "../Pages/Dashboard/ActiveRiders/ActiveRiders";
 import MakeAdmin from "../Pages/Dashboard/MakeAdmin/MakeAdmin";
 import Permission from "../Pages/Permission/Permission";
 import AdminRoute from "./AdminRoute";
+import AssignRider from "../Pages/Dashboard/AssignRider/AssignRider";
 
 export const router = createBrowserRouter([
   {
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
       {
         path: "payment-history",
         Component: PaymentHistory,
+        loader:()=>fetch('/payment-history/')
       },
       {
         path: "track-parcel",
@@ -75,6 +77,10 @@ export const router = createBrowserRouter([
       {
         path: "payment/:parcelId",
         Component: Payment,
+      },
+      {
+        path:'assign-rider',
+        Component:AssignRider
       },
       {
         path: "pending-riders",

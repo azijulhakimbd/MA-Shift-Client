@@ -1,21 +1,31 @@
-import React from "react";
+import { useEffect } from "react";
 import axios from "axios";
 import useAuth from "./useAuth";
+
 const axiosSecure = axios.create({
-  baseURL: `https://ma-shift-server.vercel.app`,
+  baseURL: "http://localhost:3000",
 });
 
 const useAxiosSecure = () => {
   const { user } = useAuth();
-  axios.interceptors.request.use(
-    (config) => {
-      config.headers.Authorization = `Bearer ${user.accessToken}`;
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
+
+  useEffect(() => {
+    const token = user?.accessToken || localStorage.getItem("access-token");
+    const interceptor = axiosSecure.interceptors.request.use(
+      (config) => {
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    return () => {
+      axiosSecure.interceptors.request.eject(interceptor);
+    };
+  }, [user]);
+
   return axiosSecure;
 };
 

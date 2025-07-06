@@ -8,7 +8,7 @@ const AdminRoute = ({children}) => {
     const {user, loading}=useAuth();
     const {role, isLoading}=useUserRole();
     if(loading || isLoading){
-        return Spinner;
+        return <Spinner></Spinner>;
     }
     if(!user || role!== 'admin'){
         return <Navigate state={{from:location.pathname}} to={"/no-permission-to-access"}></Navigate>;

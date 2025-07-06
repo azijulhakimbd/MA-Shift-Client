@@ -17,8 +17,8 @@ const MakeAdmin = () => {
     queryKey: ["search-user", queryKey],
     enabled: !!queryKey,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/email/${queryKey}`);
-      return Array.isArray(res.data) ? res.data : [res.data]; // ensure array
+      const res = await axiosSecure.get(`/users/search/${queryKey}`); // ✅ UPDATED
+      return Array.isArray(res.data) ? res.data : [res.data];
     },
   });
 
@@ -45,7 +45,7 @@ const MakeAdmin = () => {
   };
 
   return (
-    <div className=" mx-auto p-10 bg-white shadow-md rounded">
+    <div className="mx-auto p-10 bg-white shadow-md rounded">
       <h2 className="text-4xl font-bold mb-10">Manage Admin Access</h2>
 
       {/* Search Form */}
@@ -115,7 +115,8 @@ const MakeAdmin = () => {
           </table>
         </div>
       ) : (
-        queryKey && !isLoading && (
+        queryKey &&
+        !isLoading && (
           <p className="text-center text-gray-500 mt-6">No users found.</p>
         )
       )}

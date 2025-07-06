@@ -9,6 +9,7 @@ import {
   FaUserEdit,
   FaUserCheck,
   FaUserClock,
+  FaMotorcycle,
 } from "react-icons/fa";
 import { MdAdminPanelSettings } from "react-icons/md";
 import MAShiftLogo from "../Pages/Shared/MaShiftLogo/MAShiftLogo";
@@ -17,7 +18,7 @@ import Spinner from "../Components/Spinner/Spinner.jsx";
 const Dashboard = () => {
   const { role, isLoading } = useUserRole();
   if (isLoading) {
-    return Spinner
+    return <Spinner></Spinner>;
   }
   return (
     <div className="drawer lg:drawer-open">
@@ -108,8 +109,16 @@ const Dashboard = () => {
               <FaUserEdit className="text-xl" /> Update Profile
             </Link>
           </li>
-          {!isLoading && role === 'admin' && (
+          {!isLoading && role === "admin" && (
             <>
+              <li>
+                <Link
+                  to="/dashboard/assign-rider"
+                  className="flex items-center gap-3 text-cyan-600 hover:text-cyan-800 transition"
+                >
+                  <FaMotorcycle className="text-xl" /> Assign Rider
+                </Link>
+              </li>
               <li>
                 <Link
                   className="mr-1 text-green-400"
