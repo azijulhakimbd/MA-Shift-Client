@@ -5,14 +5,14 @@ import warehouses from "../../../assets/warehouses.json";
 import Swal from "sweetalert2";
 import useAxiosSecure from "../../../Hooks/useAxiosSecure";
 import useAuth from "../../../Hooks/useAuth";
-
+import { Navigate, useNavigate } from 'react-router';
 const SendParcel = () => {
   const { user } = useAuth();
   const [regionList, setRegionList] = useState([]);
   const [senderCenters, setSenderCenters] = useState([]);
   const [receiverCenters, setReceiverCenters] = useState([]);
   const axiosSecure = useAxiosSecure();
-
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -117,7 +117,7 @@ const SendParcel = () => {
       cancelButtonColor: "#FBBF24",
     }).then((result) => {
       if (result.isConfirmed) {
-        handleConfirm(data, deliveryCost); 
+        handleConfirm(data, deliveryCost);
       }
     });
   };
@@ -134,7 +134,7 @@ const SendParcel = () => {
       trackingId,
       created_by: user.email,
       delivery_status: "not_collected",
-      payment_status:"unpaid",
+      payment_status: "unpaid",
       status: "Pending",
       creation_date: new Date().toISOString(),
     };
@@ -148,7 +148,7 @@ const SendParcel = () => {
           timer: 1500,
           showConfirmButton: false,
         });
-        toast.success(`Parcel saved! Tracking ID: ${trackingId}`);
+        navigate('/dashboard/my-parcels');
         reset();
       }
     });
